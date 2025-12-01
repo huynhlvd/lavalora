@@ -26,3 +26,9 @@ pip install flash-attn --no-build-isolation
 ```Shell
 git pull
 pip install -e .
+
+## Restart  GNOME/KDE Session
+```
+sudo systemctl restart gdm
+gnome-shell --replace &
+```
