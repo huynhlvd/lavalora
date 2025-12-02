@@ -30,5 +30,5 @@ pip install -e .
 ## Restart  GNOME/KDE Session
 ```
 sudo systemctl restart gdm
-gnome-shell --replace &
+# gnome-shell --replace &
 ```
