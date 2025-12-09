@@ -84,7 +84,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 attention_mask,
                 past_key_values,
                 labels,
-                images,
+                images.to(torch.float16),
                 image_sizes
             )
 
@@ -93,7 +93,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             attention_mask=attention_mask,
             position_ids=position_ids,
             past_key_values=past_key_values,
-            inputs_embeds=inputs_embeds,
+            inputs_embeds=inputs_embeds.to(torch.float16),
             labels=labels,
             use_cache=use_cache,
             output_attentions=output_attentions,
@@ -128,7 +128,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 attention_mask,
                 None,
                 None,
-                images,
+                images.to(torch.float16),
                 image_sizes=image_sizes
             )
         else:

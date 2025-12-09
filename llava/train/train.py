@@ -102,10 +102,10 @@ class TrainingArguments(transformers.TrainingArguments):
         default=16,
         metadata={"help": "How many bits to use."}
     )
-    lora_enable: bool = False
-    lora_r: int = 64
-    lora_alpha: int = 16
-    lora_dropout: float = 0.05
+    lora_enable: bool = True # False
+    lora_r: int = 8 #16 # 64
+    lora_alpha: int = 8 #16
+    lora_dropout: float = 0.1 # 0.05
     lora_weight_path: str = ""
     lora_bias: str = "none"
     mm_projector_lr: Optional[float] = None
@@ -793,15 +793,15 @@ def train(attn_implementation=None):
         (ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     
-    model_args.model_name_or_path = f'./checkpoints/{MODEL_VERSION}'
+    model_args.model_name_or_path = 'lmsys/vicuna-7b-v1.5' #f'./checkpoints/{MODEL_VERSION}'
     model_args.version = f'{MODEL_VERSION}'
     model_args.vision_tower = 'openai/clip-vit-large-patch14'
-    model_args.pretrain_mm_mlp_adapter = f'./checkpoints/llava-{MODEL_VERSION}-pretrain/mm_projector.bin'
+    model_args.pretrain_mm_mlp_adapter = './checkpoints/llava-pretrain-vicuna-7b-v1.3/mm_projector.bin' #f'./checkpoints/llava-{MODEL_VERSION}-pretrain/mm_projector.bin'
     model_args.mm_vision_select_layer = -2
     model_args.mm_use_im_start_end = False
     model_args.mm_use_im_patch_token = False
     
-    data_args.data_path  = './playground/data/llava_instruct_80k.json'
+    data_args.data_path  = './playground/data/llava_instruct_80.json'
     data_args.image_folder = './playground/data/coco/train2017'
     data_args.lazy_preprocess = True
     
@@ -822,11 +822,12 @@ def train(attn_implementation=None):
     training_args.lr_scheduler_type = "cosine"
     training_args.logging_steps = 1
     training_args.tf32 = False
-    training_args.model_max_length = 2048
+    training_args.model_max_length = 128 # 1024 #2048
     training_args.gradient_checkpointing = True
     training_args.lazy_preprocess = True
     training_args.dataloader_num_workers = 4
-    training_args.report_to = "wandb"   
+    training_args.bits = 16
+    training_args.report_to = "none"   
     
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
@@ -986,6 +987,8 @@ def train(attn_implementation=None):
             if isinstance(module, LoraLayer):
                 if training_args.bf16:
                     module = module.to(torch.bfloat16)
+                if training_args.fp16:
+                    module = module.to(torch.float16)
             if 'norm' in name:
                 module = module.to(torch.float32)
             if 'lm_head' in name or 'embed_tokens' in name:

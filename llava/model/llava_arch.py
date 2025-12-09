@@ -139,6 +139,9 @@ class LlavaMetaForCausalLM(ABC):
 
     def encode_images(self, images):
         image_features = self.get_model().get_vision_tower()(images)
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        # image_features = self.get_model().mm_projector(image_features.to(device))
+        self.get_model().mm_projector.to(dtype=image_features.dtype, device=device)
         image_features = self.get_model().mm_projector(image_features)
         return image_features
 

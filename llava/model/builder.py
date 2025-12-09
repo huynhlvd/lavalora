@@ -140,7 +140,8 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             else:
                 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
                 model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, **kwargs)
-
+    # device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    # model = model.to(device)  # move after load if you didn't set device_map
     image_processor = None
 
     if 'llava' in model_name.lower():
