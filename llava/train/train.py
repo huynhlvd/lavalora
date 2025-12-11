@@ -102,10 +102,10 @@ class TrainingArguments(transformers.TrainingArguments):
         default=16,
         metadata={"help": "How many bits to use."}
     )
-    lora_enable: bool = True # False
-    lora_r: int = 8 #16 # 64
-    lora_alpha: int = 8 #16
-    lora_dropout: float = 0.1 # 0.05
+    lora_enable: bool = False
+    lora_r: int = 16 #8 #16 # 64
+    lora_alpha: int = 16 #8 #16
+    lora_dropout: float = 0.05 # 0.1 # 0.05
     lora_weight_path: str = ""
     lora_bias: str = "none"
     mm_projector_lr: Optional[float] = None
@@ -805,10 +805,11 @@ def train(attn_implementation=None):
     data_args.image_folder = './playground/data/coco/train2017'
     data_args.lazy_preprocess = True
     
+    training_args.lora_enable = True
     training_args.bf16 = False # True 
     training_args.fp16 = True 
     training_args.output_dir = './checkpoints/llava-$MODEL_VERSION-finetune_lora'
-    training_args.num_train_epochs = 1 
+    training_args.num_train_epochs = 5
     training_args.per_device_train_batch_size = 1
     training_args.per_device_eval_batch_size = 1
     training_args.gradient_accumulation_steps = 1 
@@ -816,18 +817,18 @@ def train(attn_implementation=None):
     training_args.save_strategy = "steps"
     training_args.save_steps = 50000
     training_args.save_total_limit = 1
-    training_args.learning_rate = 2e-5
+    training_args.learning_rate = 1e-5 # 2e-5
     training_args.weight_decay = 0.
-    training_args.warmup_ratio = 0.03
+    training_args.warmup_ratio = 0.01 # 0.03
     training_args.lr_scheduler_type = "cosine"
     training_args.logging_steps = 1
     training_args.tf32 = False
     training_args.model_max_length = 128 # 1024 #2048
     training_args.gradient_checkpointing = True
-    training_args.lazy_preprocess = True
     training_args.dataloader_num_workers = 4
     training_args.bits = 16
     training_args.report_to = "none"   
+    training_args.logging_nan_inf_filter = True
     
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
@@ -952,7 +953,10 @@ def train(attn_implementation=None):
         )
         
         vision_tower = model.get_vision_tower()
-        vision_tower.to(dtype=torch.bfloat16 if training_args.bf16 else torch.float16, device=training_args.device)
+        if training_args.fp16:
+            vision_tower.to(dtype=torch.bfloat16 if training_args.bf16 else torch.float16, device=training_args.device)
+        else:
+            vision_tower.to(dtype=torch.bfloat16 if training_args.bf16 else torch.float32, device=training_args.device)
 
         data_args.image_processor = vision_tower.image_processor
         data_args.is_multimodal = True
