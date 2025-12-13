@@ -801,7 +801,7 @@ def train(attn_implementation=None):
     model_args.mm_use_im_start_end = False
     model_args.mm_use_im_patch_token = False
     
-    data_args.data_path  = './playground/data/llava_instruct_80.json'
+    data_args.data_path  = './playground/data/llava_instruct_50.json'
     data_args.image_folder = './playground/data/coco/train2017'
     data_args.lazy_preprocess = True
     
