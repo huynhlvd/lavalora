@@ -103,7 +103,7 @@ class TrainingArguments(transformers.TrainingArguments):
         metadata={"help": "How many bits to use."}
     )
     lora_enable: bool = False
-    lora_r: int = 16 #8 #16 # 64
+    lora_r: int = 64 #8 #16 # 64
     lora_alpha: int = 16 #8 #16
     lora_dropout: float = 0.05 # 0.1 # 0.05
     lora_weight_path: str = ""
@@ -785,7 +785,7 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer,
                 data_collator=data_collator)
 
 PROMPT_VERSION = "v1"
-MODEL_VERSION = "vicuna-v1-3-7b"
+MODEL_VERSION = "vicuna_v1-3-7b"
 def train(attn_implementation=None):
     global local_rank
 
@@ -800,14 +800,16 @@ def train(attn_implementation=None):
     model_args.mm_vision_select_layer = -2
     model_args.mm_use_im_start_end = False
     model_args.mm_use_im_patch_token = False
+    # model_args.config.attn_implementation = "sdpa"
+
     
     data_args.data_path  = './playground/data/llava_instruct_50.json'
     data_args.image_folder = './playground/data/coco/train2017'
     data_args.lazy_preprocess = True
     
     training_args.lora_enable = True
-    training_args.bf16 = False # True 
-    training_args.fp16 = True 
+    training_args.bf16 = True 
+    # training_args.fp16 = False # True 
     training_args.output_dir = './checkpoints/llava-$MODEL_VERSION-finetune_lora'
     training_args.num_train_epochs = 5
     training_args.per_device_train_batch_size = 1
@@ -817,12 +819,12 @@ def train(attn_implementation=None):
     training_args.save_strategy = "steps"
     training_args.save_steps = 50000
     training_args.save_total_limit = 1
-    training_args.learning_rate = 1e-5 # 2e-5
+    training_args.learning_rate = 5e-6 # 2e-5
     training_args.weight_decay = 0.
     training_args.warmup_ratio = 0.01 # 0.03
     training_args.lr_scheduler_type = "cosine"
     training_args.logging_steps = 1
-    training_args.tf32 = False
+    training_args.tf32 = True # False
     training_args.model_max_length = 128 # 1024 #2048
     training_args.gradient_checkpointing = True
     training_args.dataloader_num_workers = 4
@@ -911,8 +913,21 @@ def train(attn_implementation=None):
                 model.to(torch.bfloat16)
             if training_args.fp16:
                 model.to(torch.float16)
-        rank0_print("Adding LoRA adapters...")
-        model = get_peft_model(model, lora_config)
+
+        total = sum(p.numel() for p in model.parameters())
+        trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+        print(f"Before Lora -> Total params: {total:,}")
+        print(f"Before Lora -> Trainable params: {trainable:,}")
+                
+        rank0_print("Adding LoRA adapters...")        
+        model = get_peft_model(model, lora_config)   
+        
+        total = sum(p.numel() for p in model.parameters())
+        trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+        print(f"After get PERF Lora -> Total params: {total:,}")
+        print(f"After get PERF Lora -> Trainable params: {trainable:,}")             
 
     if 'mpt' in model_args.model_name_or_path:
         tokenizer = transformers.AutoTokenizer.from_pretrained(
