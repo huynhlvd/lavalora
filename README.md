@@ -19,7 +19,12 @@ pip install -e .
 1. Install additional packages for training cases
 ```
 pip install -e ".[train]"
-pip install flash-attn==2.7.3 --no-build-isolation
+conda install -c nvidia cuda-toolkit=12.4
+export CUDA_HOME="$CONDA_PREFIX"
+export PATH="$CUDA_HOME/bin:$PATH"
+export LD_LIBRARY_PATH="$CUDA_HOME/lib:$LD_LIBRARY_PATH"
+pip install -U pip setuptools wheel
+pip install flash-attn --no-build-isolation
 ```
 
 ### Upgrade to latest code base
