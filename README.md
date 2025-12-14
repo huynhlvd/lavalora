@@ -17,14 +17,19 @@ pip install -e .
 ```
 
 1. Install additional packages for training cases
-```
+```Shell
 pip install -e ".[train]"
 conda install -c nvidia cuda-toolkit=12.4
 export CUDA_HOME="$CONDA_PREFIX"
 export PATH="$CUDA_HOME/bin:$PATH"
 export LD_LIBRARY_PATH="$CUDA_HOME/lib:$LD_LIBRARY_PATH"
 pip install -U pip setuptools wheel
-pip install flash-attn --no-build-isolation
+pip install flash-attn==2.7.3 --no-build-isolation
+```
+
+### Environment Fixing
+```Shell
+pip install "protobuf==3.20.3"
 ```
 
 ### Upgrade to latest code base
