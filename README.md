@@ -10,6 +10,8 @@ cd LLaVA
 1. Install Package
 ```Shell
 conda create -n llava python=3.11 -y
+conda init
+source ~/.bashrc
 conda activate llava
 pip install --upgrade pip  # enable PEP 660 support
 pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124

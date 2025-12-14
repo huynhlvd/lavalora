@@ -103,9 +103,9 @@ class TrainingArguments(transformers.TrainingArguments):
         metadata={"help": "How many bits to use."}
     )
     lora_enable: bool = False
-    lora_r: int = 64 #8 #16 # 64
-    lora_alpha: int = 16 #8 #16
-    lora_dropout: float = 0.05 # 0.1 # 0.05
+    lora_r: int = 64 # 64 #8 #16 # 64
+    lora_alpha: int = 64 #16 #8 #16
+    lora_dropout: float = 0.1 #0.05 # 0.1 # 0.05
     lora_weight_path: str = ""
     lora_bias: str = "none"
     mm_projector_lr: Optional[float] = None
@@ -807,7 +807,7 @@ def train(attn_implementation=None):
     data_args.image_folder = './playground/data/coco/train2017'
     data_args.lazy_preprocess = True
     
-    training_args.lora_enable = True
+    training_args.lora_enable = False # True
     training_args.bf16 = True 
     # training_args.fp16 = False # True 
     training_args.output_dir = './checkpoints/llava-$MODEL_VERSION-finetune_lora'
@@ -821,10 +821,10 @@ def train(attn_implementation=None):
     training_args.save_total_limit = 1
     training_args.learning_rate = 5e-6 # 2e-5
     training_args.weight_decay = 0.
-    training_args.warmup_ratio = 0.01 # 0.03
+    training_args.warmup_ratio = 0.03 # 0.03
     training_args.lr_scheduler_type = "cosine"
     training_args.logging_steps = 1
-    training_args.tf32 = True # False
+    training_args.tf32 = False
     training_args.model_max_length = 128 # 1024 #2048
     training_args.gradient_checkpointing = True
     training_args.dataloader_num_workers = 4
