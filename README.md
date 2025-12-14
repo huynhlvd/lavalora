@@ -34,6 +34,12 @@ pip install flash-attn==2.7.3 --no-build-isolation
 pip install "protobuf==3.20.3"
 ```
 
+### Ensure the inputs are the same dtype as the model weights (bfloat16 in this case)
+```
+    with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
+        outputs = model(**inputs)
+```
+
 ### Upgrade to latest code base
 
 ```Shell
