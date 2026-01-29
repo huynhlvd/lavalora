@@ -786,12 +786,16 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer,
 
 PROMPT_VERSION = "v1"
 MODEL_VERSION = "vicuna_v1-3-7b"
+# MODEL_VERSION = "llavairis_v06"
 def train(attn_implementation=None):
     global local_rank
 
     parser = transformers.HfArgumentParser(
         (ModelArguments, DataArguments, TrainingArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    args = [
+        '--output_dir', f'./checkpoints/lora_{MODEL_VERSION}'
+    ]
+    model_args, data_args, training_args = parser.parse_args_into_dataclasses(args)
     
     model_args.model_name_or_path = 'lmsys/vicuna-7b-v1.5' #f'./checkpoints/{MODEL_VERSION}'
     model_args.version = f'{MODEL_VERSION}'

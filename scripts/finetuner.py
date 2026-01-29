@@ -1,3 +1,7 @@
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from llava.train.train import train
 import argparse
 # from llava.model.builder import load_pretrained_model

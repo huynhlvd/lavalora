@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.fontSize": 11,
+    "workbench.editor.enablePreview": true,
+    "workbench.editor.enablePreviewFromQuickOpen": false,
+    "workbench.editor.showTabs": "multiple"
+}
