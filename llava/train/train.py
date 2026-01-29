@@ -103,8 +103,8 @@ class TrainingArguments(transformers.TrainingArguments):
         metadata={"help": "How many bits to use."}
     )
     lora_enable: bool = False
-    lora_r: int = 64 # 64 #8 #16 # 64
-    lora_alpha: int = 64 #16 #8 #16
+    lora_r: int = 256 # 64 # 64 #8 #16 # 64
+    lora_alpha: int = 256 # 64 #16 #8 #16
     lora_dropout: float = 0.1 #0.05 # 0.1 # 0.05
     lora_weight_path: str = ""
     lora_bias: str = "none"
@@ -811,10 +811,10 @@ def train(attn_implementation=None):
     data_args.image_folder = './playground/data/coco/train2017'
     data_args.lazy_preprocess = True
     
-    training_args.lora_enable = False # True
+    training_args.lora_enable = True
     training_args.bf16 = True 
     # training_args.fp16 = False # True 
-    training_args.output_dir = './checkpoints/llava-$MODEL_VERSION-finetune_lora'
+    training_args.output_dir = f'./checkpoints/llava-{MODEL_VERSION}-finetune_lora'
     training_args.num_train_epochs = 5
     training_args.per_device_train_batch_size = 1
     training_args.per_device_eval_batch_size = 1
